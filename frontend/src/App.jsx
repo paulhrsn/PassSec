@@ -1,37 +1,26 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo  from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import QuizPage from "./pages/QuizPage";
+import LabPage from "./pages/LabPage";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
-  const [count, setCount] = useState(0)
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 space-y-6">
-      {/* ——— TAILWIND SMOKE TEST ——— */}
-      <div className="bg-red-500 text-white px-4 py-2 rounded-lg">
-        If you see this in a red box, Tailwind is working ✅
+    <Router>
+      <Navbar />
+      <div className="p-4">
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/lab" element={<LabPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
       </div>
-    <div className="App">
-      <header className="App-header">
-        <img src={viteLogo}  className="App-logo"        alt="Vite Logo" />
-        <img src={reactLogo} className="App-logo react"  alt="React Logo" />
-        <p>Vite + React</p>
-        <button onClick={() => setCount((c) => c + 1)}>
-          count is {count}
-        </button>
-        <p>Edit <code>src/App.jsx</code> and save to test HMR</p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-    </div>
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;
