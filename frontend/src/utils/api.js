@@ -51,3 +51,10 @@ export async function registerUser({ email, password }) {
     //  POST `${API_BASE_URL}/quiz/submit`
     return { error: "registerUser not implemented" };
   }
+
+  export async function checkHealth() {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/health`);
+    const data = await res.json();
+    return data;
+  }
+  

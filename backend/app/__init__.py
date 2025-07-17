@@ -6,6 +6,7 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 from app.extensions import db, bcrypt, jwt
+from extensions import init_extensions
 
 
 #load valiues from .env file like JWT_SECRET_KEY
@@ -14,7 +15,7 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-
+    init_extensions(app)
     #config values; just for dev and prod
 
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///dev.db")

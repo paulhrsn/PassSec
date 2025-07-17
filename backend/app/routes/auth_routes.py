@@ -56,9 +56,11 @@ def login():
     #If it is valid create a JWT token where user.id becomes the identity
     token = create_access_token(identity=user.id)
 
+
     #return token and user info to frontend
 
     return jsonify({
         "token": token,
         "user": user.to_dict()
     }), 200
+

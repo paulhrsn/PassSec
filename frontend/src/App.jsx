@@ -5,8 +5,13 @@ import Register from "./pages/Register";
 import QuizPage from "./pages/QuizPage";
 import LabPage from "./pages/LabPage";
 import Dashboard from "./pages/Dashboard";
+import React, { useEffect } from "react";
+import { checkHealth } from "./utils/api";
 
 function App() {
+  useEffect(() => {
+    checkHealth().then(console.log).catch(console.error);
+  }, []);
   return (
     <Router>
       <Navbar />
@@ -22,5 +27,7 @@ function App() {
     </Router>
   );
 }
+
+
 
 export default App;
