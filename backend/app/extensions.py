@@ -7,7 +7,6 @@ from flask_cors import CORS
 
 def init_extensions(app):
     CORS(app)
-
-db = SQLAlchemy()
-bcrypt = Bcrypt()
-jwt = JWTManager()
+    db = SQLAlchemy()
+    bcrypt = Bcrypt()
+    jwt = JWTManager()
