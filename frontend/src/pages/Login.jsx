@@ -11,6 +11,7 @@ export default function Login() {
     const [password, setPassword] = useState(""); //controlled password input
     const [error, setError] = useState(""); //holds login error msg
     const [loading, setLoading] = useState(false);//track if loading so we can disable button while it's submitting
+    const [showPassword, setShowPassword] = useState(false); //add a show pw box
 
     //router hook, programmatically navigate on success
     const navigate = useNavigate();
@@ -65,14 +66,27 @@ export default function Login() {
     
             {/* password field */}
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)} // Update state on change
               className="w-full p-2 border rounded"
               required
             />
-    
+
+          {/* toggle checkbox */}
+        <div className="flex items-center space-x-2 mt-1">
+          <input
+            type="checkbox"
+            id="showPassword"
+            checked={showPassword}
+            onChange={() => setShowPassword(!showPassword)}
+            className="w-4 h-4"
+          />
+          <label htmlFor="showPassword" className="text-sm text-gray-700">
+            Show Password
+          </label>
+        </div>
             {/* submit button */}
             <button
           type="submit"
