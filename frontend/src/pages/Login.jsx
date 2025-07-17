@@ -10,6 +10,7 @@ export default function Login() {
     const [email, setEmail] = useState(""); //controlled email input
     const [password, setPassword] = useState(""); //controlled password input
     const [error, setError] = useState(""); //holds login error msg
+    const [loading, setLoading] = useState(false);//track if loading so we can disable button while it's submitting
 
     //router hook, programmatically navigate on success
     const navigate = useNavigate();
@@ -18,7 +19,8 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault(); //prevent full page reload
-
+        setError("");
+        setLoading(true);
         try {
             //call api helper w/ current credentials
             const { token, user, error: loginError } = await loginUser({ email, password });
@@ -36,6 +38,8 @@ export default function Login() {
         } catch (err) {
             //on failure
             setError(err.message || "Login failed");
+        } finally {
+          setLoading(false)
         }
     };
     //jsx render
@@ -71,12 +75,15 @@ export default function Login() {
     
             {/* submit button */}
             <button
-              type="submit"
-              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Log In
-            </button>
-          </form>
-        </div>
-      );
-    }
+          type="submit"
+          disabled={loading}  // Prevent double-clicks during login attempt
+          className={`w-full py-2 text-white rounded 
+            ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+        >
+          {/* change button text while loading */}
+          {loading ? "Logging in…" : "Log In"}
+        </button>
+      </form>
+    </div>
+  );
+}
