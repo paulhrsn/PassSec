@@ -39,12 +39,15 @@ export async function loginUser({ email, password}) {
 
 export async function registerUser({ email, password }) {
     // same structure, POST to `${API_BASE_URL}/register`
+    return { error: "registerUser not implemented" };
   }
   
   export async function fetchQuizQuestions() {
     //  GET `${API_BASE_URL}/quiz`
+    return { error: "registerUser not implemented" };
   }
   
   export async function submitQuizAnswers(answers) {
     //  POST `${API_BASE_URL}/quiz/submit`
+    return { error: "registerUser not implemented" };
   }
