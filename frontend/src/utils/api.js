@@ -21,3 +21,8 @@ export async function loginUser(credentials) {
         return { error: "Network error" };
     }
 }
+
+//placeholders for next api calls
+// export async function registerUser(...) { ... }
+// export async function fetchQuizQuestions() { ... }
+// export async function submitQuizAnswers(...) { ... }

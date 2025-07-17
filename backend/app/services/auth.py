@@ -4,7 +4,7 @@ from app import bcrypt
 
 def hash_password(plain_text):
     #bcrypt returns bytes, decode to string
-    return bcrypt.generate_password_hash(plain_text).decide('utf-8')
+    return bcrypt.generate_password_hash(plain_text).decode('utf-8')
 
 #check if a plain-text pw matches stored hash
 def check_password (hashed, plain_text):

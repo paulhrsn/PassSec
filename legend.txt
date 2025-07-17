@@ -1,10 +1,13 @@
 .venv/ is for python virtual environment
 app/ is the flask app package
     routes/ is blueprints for all the endpoints
+        auth_routes defines /api/login route
     models/ is the sqlalchemy orm models
     services/ is business logic like auth, scoring, etc
-    __init__.py is the app factory
+    __init__.py is the app factory sets up DB JWT and routes
 config.py is the app configuration like env vars, db uri etc
 db.py is the sqlalchemy instance
 run.py is the entrypoint to launch server
-requirements.txt is pinned python dependences    
+requirements.txt is pinned python dependences 
+auth.py handles password hashing/checking
+user.py defines user table and to_dict   

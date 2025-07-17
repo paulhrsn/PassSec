@@ -5,14 +5,12 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
+from app.extensions import db, bcrypt, jwt
+
 
 #load valiues from .env file like JWT_SECRET_KEY
 load_dotenv()
 
-#create global extensions to later init
-db = SQLAlchemy()
-bcrypt = Bcrypt()
-jwt = JWTManager()
 
 def create_app():
     app = Flask(__name__)
@@ -31,9 +29,16 @@ def create_app():
 
     #register route blueprints
     from app.routes.auth_routes import auth_bp
+   # from app.routes.quiz_routes import quiz_bp
+   # from app.routes.lab_routes import lab_bp
     app.register_blueprint(auth_bp)
-    
-    #cli option: create-user --email EMAIL --passwoerd PASSWORD
-    @app.cli.command("create-user")
-    @click.option("--email", prompt="True")
+    # app.register_blueprint(quiz_bp)
+    # app.register_blueprint(lab_bp)
+
+    from app.models import user 
+    from app.cli import create_user 
+    app.cli.add_command(create_user)
     return app
+
+
+    
