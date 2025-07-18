@@ -1,4 +1,4 @@
-from app import db
+from app.extensions import db
 #user model as a row in the db
 
 class User(db.Model):
