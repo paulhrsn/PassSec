@@ -6,14 +6,14 @@ from app.extensions import init_extensions
 
 #load valiues from .env file like JWT_SECRET_KEY
 load_dotenv()
-
+print("→ DATABASE_URL=", os.getenv("DATABASE_URL"))
 
 def create_app():
     app = Flask(__name__)
     #init extensions
     #config values; just for dev and prod
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///dev.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///instance/dev.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "dev-secret")  #remember to replace for prod
 
