@@ -1,9 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app.models.user import User
-from app.services.auth import check_password
 from flask_jwt_extended import create_access_token
-from app.services.auth import hash_password
-from db import db
+from app.services.auth import hash_password, check_password
+from app.extensions import db
 
 #set up flask blueprint for grouping auth routes
 auth_bp = Blueprint("auth", __name__, url_prefix="/api")
@@ -11,7 +10,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api")
 
 #POST /api/register route
 
-auth_bp.route("/register", methods=["POST"])
+@auth_bp.route("/register", methods=["POST"])
 def register():
     #get json from frontend, expecting {email, password}
     data = request.get_json() or {}
@@ -53,7 +52,7 @@ def login():
     if not user or not check_password(user.password, password):
         return jsonify({"error": "Invalid credentials"}), 401
     
-    #If it is valid create a JWT token where user.id becomes the identity
+    #ff it is valid create a JWT token where user.id becomes the identity
     token = create_access_token(identity=user.id)
 
 
