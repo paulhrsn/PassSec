@@ -30,11 +30,9 @@ def create_app():
 
 
 
-   # from app.routes.quiz_routes import quiz_bp
-   # from app.routes.lab_routes import lab_bp
-    # app.register_blueprint(quiz_bp)
+    # from app.routes.lab_routes import lab_bp
     # app.register_blueprint(lab_bp)
-
+    from app import models
     from app.models import user 
     from app.cli import create_user 
     app.cli.add_command(create_user)
