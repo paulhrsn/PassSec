@@ -24,6 +24,9 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix = "/api")
     from app.routes.health import health_bp
     app.register_blueprint(health_bp, url_prefix="/api")
+    from app.routes.quiz_routes import quiz_bp
+    app.register_blueprint(quiz_bp, url_prefix="/api")
+    
 
 
 
