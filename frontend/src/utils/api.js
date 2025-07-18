@@ -43,9 +43,11 @@ export async function registerUser({ email, password }) {
   }
   
   export async function fetchQuizQuestions() {
-    //  GET `${API_BASE_URL}/quiz`
-    return { error: "registerUser not implemented" };
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/quiz`);
+    if (!res.ok) throw new Error("Failed to fetch quiz questions");
+    return res.json();
   }
+  
   
   export async function submitQuizAnswers(answers) {
     //  POST `${API_BASE_URL}/quiz/submit`
