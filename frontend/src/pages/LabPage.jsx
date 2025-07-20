@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { submitLabAnswer } from "../utils/api";
+import { submitLabAnswer, fetchLab } from "../utils/api";
 
 export default function LabPage() {
   // state to store the lab data fetched from the backend
@@ -13,19 +13,17 @@ export default function LabPage() {
   // lab ID you want to fetch (you can later make this dynamic via routing)
   const labId = 1;
   // fetch the lab from the backend when the page loads
-  useEffect(() => {
-    async function fetchLab() {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/lab/${labId}`);
-        const data = await res.json();
-        setLab(data); // store in state
-      } catch (err) {
-        console.error("Failed to fetch lab:", err);
-      }
-    }
 
-    fetchLab();
-  }, [labId]); // re-run if labId ever changes
+   //fetch lab on mount
+   useEffect(() => {
+    fetchLab(labId)
+      .then((data) => setLab(data))
+      .catch((err) => {
+        console.error("Failed to fetch lab:", err);
+        setLab(null); // Optional: reset on failure
+      });
+  }, [labId]);
+    // re-run if labId ever changes
 
   // submit the user's selected answer to backend for scoring
   const handleSubmit = async () => {

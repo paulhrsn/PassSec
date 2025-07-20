@@ -1,5 +1,5 @@
 //base url for API calls, pulls from vite env var (VITE_API_URL) or falls back to local dev if that fails
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
 //loginUser to hit /api/login endpoint:
 //accepts object { email, password }
@@ -36,7 +36,6 @@ export async function loginUser({ email, password}) {
 
 //placeholder stubs for my endpoints later
 //i think they can all be the same structure as above
-
 export async function registerUser({ email, password }) {
     // same structure, POST to `${API_BASE_URL}/register`
     return { error: "registerUser not implemented" };
@@ -74,3 +73,10 @@ export async function registerUser({ email, password }) {
     return res.json();
   }
   
+  //lab fetching
+export async function fetchLab(labId) {
+  const res = await fetch(`${API_BASE_URL}/lab/${labId}`);
+  if (!res.ok) throw new Error(`Failed to fetch lab (${res.status})`);
+  return res.json();
+}
+

@@ -2,6 +2,7 @@ from flask import Flask
 import os
 from dotenv import load_dotenv
 from app.extensions import init_extensions
+from config import Config
 
 
 #load valiues from .env file like JWT_SECRET_KEY
@@ -10,12 +11,10 @@ print("→ DATABASE_URL=", os.getenv("DATABASE_URL"))
 
 def create_app():
     app = Flask(__name__)
+    app.config.from_object("config.Config")  #load config from class
     #init extensions
     #config values; just for dev and prod
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///instance/dev.db")
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "dev-secret")  #remember to replace for prod
 
     init_extensions(app)
 
@@ -34,8 +33,6 @@ def create_app():
 
     # from app.routes.lab_routes import lab_bp
     # app.register_blueprint(lab_bp)
-    from app import models
-    from app.models import user 
     from app.cli import create_user 
     app.cli.add_command(create_user)
     return app
