@@ -29,11 +29,11 @@ export default function LabList() {
             <li key={lab.id}>
               {/* each lab title links to /labs/:labId */}
               <Link
-                to={`/labs/${lab.id}`}
-                className="text-blue-600 hover:underline"
-              >
-                🔍 {lab.title}
-              </Link>
+  to={`/labs/${lab.id}`}
+  className="block bg-blue-100 rounded-lg p-4 shadow hover:bg-blue-200 transition"
+>
+  <div className="text-lg font-semibold text-blue-800">🔍 {lab.title}</div>
+</Link>
             </li>
           ))}
         </ul>
