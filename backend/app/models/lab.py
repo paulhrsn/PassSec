@@ -1,5 +1,6 @@
 # app/models/lab.py
 from app.extensions import db
+from datetime import datetime
 
 class LabScenario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -18,3 +19,10 @@ class LabScenario(db.Model):
             "choices": self.choices,
             "answer": self.answer,
         }
+
+class LabAttempt(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)  # foreign key later if you want
+    scenario_id = db.Column(db.Integer, nullable=False)
+    selected_answer = db.Column(db.String, nullable=False)
+    correct = db.Column(db.Boolean, nullable=False)

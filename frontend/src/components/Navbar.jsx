@@ -6,7 +6,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* logo / title */}
         <Link to="/" className="text-xl font-bold hover:text-blue-400">
-          SecTrack
+          PassSec
         </Link>
 
         {/* nav links */}
