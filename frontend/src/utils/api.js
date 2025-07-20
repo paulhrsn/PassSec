@@ -80,3 +80,9 @@ export async function fetchLab(labId) {
   return res.json();
 }
 
+
+export async function fetchAllLabs() {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/labs`);
+  if (!res.ok) throw new Error("Failed to fetch labs");
+  return res.json();
+}

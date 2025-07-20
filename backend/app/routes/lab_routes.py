@@ -39,9 +39,22 @@ def submit_lab_answer():
     }), 200
 
 # GET /api/lab/<lab_id> to fetch a single lab by ID
-@lab_bp.route("/lab/<int:lab_id>", methods=["GET"])
+@lab_bp.route("/labs/<int:lab_id>", methods=["GET"])
 def get_lab_by_id(lab_id: int):
     lab = LabScenario.query.get(lab_id)
     if not lab:
         return jsonify({"error": "Lab not found"}), 404
     return jsonify(lab.to_dict()), 200
+
+
+@lab_bp.route("/", methods=["GET"])
+def get_all_labs():
+    labs = LabScenario.query.all()  #fetch all LabScenario rows from the database
+
+    #convert each lab to a dict with just the fields we need for the list view
+    lab_list = [{
+        "id": lab.id,
+        "title": lab.title
+    } for lab in labs]
+
+    return jsonify(lab_list)  #return as JSON to the frontend

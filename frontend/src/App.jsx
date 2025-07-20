@@ -7,6 +7,7 @@ import LabPage from "./pages/LabPage";
 import Dashboard from "./pages/Dashboard";
 import React, { useEffect } from "react";
 import { checkHealth } from "./utils/api";
+import LabList from "./pages/LabList";
 
 function App() {
   useEffect(() => {
@@ -21,6 +22,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/lab" element={<LabPage />} />
+          <Route path="/labs" element={<LabList />} />
+          <Route path="/labs/:labId" element={<LabPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </div>
