@@ -11,18 +11,18 @@ export default function LabPage() {
   const [feedback, setFeedback] = useState("");
 
   // lab ID you want to fetch (you can later make this dynamic via routing)
-  const labId = 1;
+  const lab_id = 1;
   // fetch the lab from the backend when the page loads
 
    //fetch lab on mount
    useEffect(() => {
-    fetchLab(labId)
+    fetchLab(lab_id)
       .then((data) => setLab(data))
       .catch((err) => {
         console.error("Failed to fetch lab:", err);
         setLab(null); // Optional: reset on failure
       });
-  }, [labId]);
+  }, [lab_id]);
     // re-run if labId ever changes
 
   // submit the user's selected answer to backend for scoring
@@ -30,7 +30,7 @@ export default function LabPage() {
     try {
       const res = await submitLabAnswer({
         userId: "demo", // replace with actual user ID later
-        labId: labId,
+        lab_id: lab_id,
         answer: selectedAnswer,
       });
 
