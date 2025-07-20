@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { submitLabAnswer, fetchLab } from "../utils/api";
+import { useParams } from "react-router-dom";
+
 
 export default function LabPage() {
   // state to store the lab data fetched from the backend
@@ -11,7 +13,8 @@ export default function LabPage() {
   const [feedback, setFeedback] = useState("");
 
   // lab ID you want to fetch (you can later make this dynamic via routing)
-  const lab_id = 1;
+  const { labId } = useParams();
+  const lab_id = parseInt(labId, 10); 
   // fetch the lab from the backend when the page loads
 
    //fetch lab on mount
