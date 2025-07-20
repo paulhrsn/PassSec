@@ -61,7 +61,7 @@ export async function registerUser({ email, password }) {
   
   export async function submitLabAnswer(data) {
     //data is gonna have a userId, labId, and answer
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/lab/submit`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/labs/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,14 +75,14 @@ export async function registerUser({ email, password }) {
   
   //lab fetching
 export async function fetchLab(labId) {
-  const res = await fetch(`${API_BASE_URL}/lab/${labId}`);
+  const res = await fetch(`${API_BASE_URL}/labs/${labId}`);
   if (!res.ok) throw new Error(`Failed to fetch lab (${res.status})`);
   return res.json();
 }
 
 
 export async function fetchAllLabs() {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/labs`);
+  const res = await fetch(`${API_BASE_URL}/labs`);
   if (!res.ok) throw new Error("Failed to fetch labs");
   return res.json();
 }

@@ -6,18 +6,11 @@ from app.models.lab import LabScenario
 lab_bp = Blueprint("lab", __name__, url_prefix="/api")
 
 
-# GET /api/lab to fetch all the lab scenarios
-@lab_bp.route("/lab", methods=["GET"])
-def get_labs():
-    #query all lab entries from the database
-    labs = LabScenario.query.all()
-    
-    #convert each lab to a dictionary and return as JSON
-    return jsonify([lab.to_dict() for lab in labs]), 200
+
 
 
 # POST /api/lab/submit to submit an answer to a lab
-@lab_bp.route("/lab/submit", methods=["POST"])
+@lab_bp.route("/labs/submit", methods=["POST"])
 def submit_lab_answer():
     #parse the JSON body of the request
     data = request.get_json()
@@ -47,7 +40,7 @@ def get_lab_by_id(lab_id: int):
     return jsonify(lab.to_dict()), 200
 
 
-@lab_bp.route("/", methods=["GET"])
+@lab_bp.route("/labs", methods=["GET"])
 def get_all_labs():
     labs = LabScenario.query.all()  #fetch all LabScenario rows from the database
 
