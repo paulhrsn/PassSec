@@ -37,3 +37,11 @@ def submit_lab_answer():
         "correct": correct,
         "correct_answer": lab.answer
     }), 200
+
+# GET /api/lab/<lab_id> to fetch a single lab by ID
+@lab_bp.route("/lab/<string:lab_id>", methods=["GET"])
+def get_lab_by_id(lab_id):
+    lab = LabScenario.query.get(lab_id)
+    if not lab:
+        return jsonify({"error": "Lab not found"}), 404
+    return jsonify(lab.to_dict()), 200
