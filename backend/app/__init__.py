@@ -6,12 +6,12 @@ from config import Config
 
 
 #load valiues from .env file like JWT_SECRET_KEY
-load_dotenv()
+load_dotenv(override=True)
 print("→ DATABASE_URL=", os.getenv("DATABASE_URL"))
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object("config.Config")  #load config from class
+    app.config.from_object(Config)  #load config from class
     #init extensions
     #config values; just for dev and prod
 
