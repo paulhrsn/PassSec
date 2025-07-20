@@ -13,7 +13,7 @@ with app.app_context():
     db.drop_all()
     db.create_all()
 
-    lab = LabScenario(
+    labs = [LabScenario(
         title="Phishing Log Investigation",
         log_data="""
 Jul 12 10:33:21 mailserver postfix/smtpd[12345]: connect from unknown[192.168.1.45]
@@ -28,8 +28,17 @@ Jul 12 10:33:23 mailserver postfix/smtpd[12345]: disconnect from unknown[192.168
             "Man-in-the-Middle"
         ],
         answer="Credential Harvesting"
-    )
 
-    db.session.add(lab)
+    ),
+    LabScenario(
+        title="Firewall Log: Port Scan Attempt",
+        log_data="IN=eth0 OUT= MAC=... SRC=192.168.1.200 DST=192.168.1.10...",
+        question="What is the most likely attack type?",
+        choices=["Port Scanning", "DDoS", "Buffer Overflow", "Phishing"],
+        answer="Port Scanning",
+    ),
+]
+
+    db.session.add_all(labs)
     db.session.commit()
     print("✅ Lab scenario seeded.")
