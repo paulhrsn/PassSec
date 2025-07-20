@@ -11,13 +11,12 @@ export default function LabPage() {
   const [feedback, setFeedback] = useState("");
 
   // lab ID you want to fetch (you can later make this dynamic via routing)
-  const labId = "phishing-log-1";
-
+  const labId = 1;
   // fetch the lab from the backend when the page loads
   useEffect(() => {
     async function fetchLab() {
       try {
-        const res = await fetch(`/api/lab/${labId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/lab/${labId}`);
         const data = await res.json();
         setLab(data); // store in state
       } catch (err) {

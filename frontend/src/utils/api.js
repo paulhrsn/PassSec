@@ -60,3 +60,17 @@ export async function registerUser({ email, password }) {
     return data;
   }
   
+  export async function submitLabAnswer(data) {
+    //data is gonna have a userId, labId, and answer
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/lab/submit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+  
+    if (!res.ok) throw new Error("Submission failed");
+    return res.json();
+  }
+  
