@@ -3,6 +3,7 @@ from app.models.user import User
 from flask_jwt_extended import create_access_token
 from app.services.auth import hash_password, check_password
 from app.extensions import db
+from sqlalchemy.exc import IntegrityError
 
 #set up flask blueprint for grouping auth routes
 auth_bp = Blueprint("auth", __name__, url_prefix="/api")
@@ -12,22 +13,30 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api")
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    #get json from frontend, expecting {email, password}
-    data = request.get_json() or {}
+    #parse incoming JSON
+    data = request.get_json(silent=True) or {}
     email = data.get("email")
     password = data.get("password")
 
+    #basic validation
     if not email or not password:
         return jsonify({"error": "Email and password required"}), 400
 
-    #check if already exists
+    #prevent duplicate sign-ups
     if User.query.filter_by(email=email).first():
-        return jsonify ({"message": "User already exists"}), 400
-    
+        return jsonify({"error": "User already exists"}), 400
+
+    # hash the password before saving
     hashed_pw = hash_password(password)
     new_user = User(email=email, password=hashed_pw)
     db.session.add(new_user)
-    db.session.commit()
+
+    # catch any race-condition duplicates at commit time
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "User already exists"}), 400
 
     return jsonify({"message": "User created successfully"}), 201
 
