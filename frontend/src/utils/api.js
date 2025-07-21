@@ -28,9 +28,27 @@ export async function loginUser({ email, password }) {
  // @param {{ email: string, password: string }}
  // @returns {Promise<{ error: string }>}
  
-export async function registerUser({ email, password }) {
-  return { error: "registerUser not implemented" };
+ export async function registerUser({ email, password }) {
+  try {
+    const res = await fetch(`${API_BASE}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return { error: data.error || data.message || "Registration failed" };
+    }
+
+    return {}; //success
+  } catch (err) {
+    console.error("registerUser network error:", err);
+    return { error: "Network error" };
+  }
 }
+
 
 
 
