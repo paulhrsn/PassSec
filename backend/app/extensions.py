@@ -12,11 +12,14 @@ jwt    = JWTManager()
 cors = CORS()
 
 def init_extensions(app):
-    #wire extensions into app
-    cors.init_app(app,
-             resources={r"/api/*": {"origins": "http://localhost:5173"}}, #allow requests from react to access any flask route starting w/ api
-             supports_credentials=True
-             ) 
+    cors.init_app(
+        app,
+        resources={r"/api/.*": {"origins": "http://localhost:5173"}},  # Vite dev server
+        supports_credentials=True,
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+    )
+
     
     db.init_app(app)
     bcrypt.init_app(app)

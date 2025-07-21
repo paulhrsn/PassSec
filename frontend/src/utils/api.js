@@ -40,19 +40,6 @@ export async function registerUser({ email, password }) {
     // same structure, POST to `${API_BASE_URL}/register`
     return { error: "registerUser not implemented" };
   }
-  
-  export async function fetchQuizQuestions() {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/quiz`);
-    if (!res.ok) throw new Error("Failed to fetch quiz questions");
-    return res.json();
-  }
-  
-  
-  export async function submitQuizAnswers(answers) {
-    //  POST `${API_BASE_URL}/quiz/submit`
-    return { error: "registerUser not implemented" };
-  }
-
   export async function checkHealth() {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/health`);
     const data = await res.json();
@@ -85,4 +72,32 @@ export async function fetchAllLabs() {
   const res = await fetch(`${API_BASE_URL}/labs`);
   if (!res.ok) throw new Error("Failed to fetch labs");
   return res.json();
+}
+
+
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5001/api";
+
+// fetch quiz questions (can be filtered by domain or count)
+export async function fetchQuizQuestions({ domain = "", count = 5 }) {
+  const url = new URL(`${API_BASE}/quiz`);
+  if (domain) url.searchParams.append("domain", domain);
+  if (count) url.searchParams.append("count", count);
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch quiz questions");
+  return res.json();
+}
+
+//submit answers to the backend for scoring
+export async function submitQuizAnswers(answers) {
+  const res = await fetch(`${API_BASE}/quiz/submit`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ answers }),
+  });
+
+  if (!res.ok) throw new Error("Quiz submission failed");
+  return res.json(); //should return { score: x }
 }
