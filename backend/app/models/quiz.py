@@ -16,6 +16,6 @@ class QuizQuestion(db.Model):
             "domain": self.domain,
             "question": self.question,
             "choices": self.choices,
-            "explanation": self.explanation,
+            "explanation": "",
         }
 
