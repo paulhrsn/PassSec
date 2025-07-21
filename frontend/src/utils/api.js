@@ -1,103 +1,108 @@
-//base url for API calls, pulls from vite env var (VITE_API_URL) or falls back to local dev if that fails
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
-
-//loginUser to hit /api/login endpoint:
-//accepts object { email, password }
-//on success, returns { token, user }
-//on HTTP error will return { error : "..." }
-//on network error returns { error : "Network error" }
-export async function loginUser({ email, password}) {
-    try {
-        const res = await fetch(`${API_BASE_URL}/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            //converts js object to json string for http body
-            body: JSON.stringify({ email: email.trim(), password }),
-        });
-
-        //parse json response
-        const data = await res.json();
-
-        //if http status not in 200-299 range then it's an error
-        if (!res.ok) {
-            return { error: data.message || "Login Failed"};
-        }
-
-        //on success return the jwt token and other user backend objects
-        return { token: data.token, user:data.user };
-    } catch (err) {
-        //network failure like DNS lands here i think
-        console.error("loginUser network error:", err);
-        return { error: "Network error" };
-    }
-}
-
-//placeholder stubs for my endpoints later
-//i think they can all be the same structure as above
-export async function registerUser({ email, password }) {
-    // same structure, POST to `${API_BASE_URL}/register`
-    return { error: "registerUser not implemented" };
-  }
-  export async function checkHealth() {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/health`);
-    const data = await res.json();
-    return data;
-  }
-  
-  export async function submitLabAnswer(data) {
-    //data is gonna have a userId, labId, and answer
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/labs/submit`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-  
-    if (!res.ok) throw new Error("Submission failed");
-    return res.json();
-  }
-  
-  //lab fetching
-export async function fetchLab(labId) {
-  const res = await fetch(`${API_BASE_URL}/labs/${labId}`);
-  if (!res.ok) throw new Error(`Failed to fetch lab (${res.status})`);
-  return res.json();
-}
-
-
-export async function fetchAllLabs() {
-  const res = await fetch(`${API_BASE_URL}/labs`);
-  if (!res.ok) throw new Error("Failed to fetch labs");
-  return res.json();
-}
-
-
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5001/api";
 
-// fetch quiz questions (can be filtered by domain or count)
+  
+//  @param {{ email: string, password: string }}
+// @returns {Promise<{ token: string, user: object } | { error: string }>}
+ 
+export async function loginUser({ email, password }) {
+  try {
+    const res = await fetch(`${API_BASE}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return { error: data.message || "Login failed" };
+    }
+
+    return { token: data.token, user: data.user };
+  } catch (err) {
+    console.error("loginUser network error:", err);
+    return { error: "Network error" };
+  }
+}
+
+ // @param {{ email: string, password: string }}
+ // @returns {Promise<{ error: string }>}
+ 
+export async function registerUser({ email, password }) {
+  return { error: "registerUser not implemented" };
+}
+
+
+
+  
+  //@param {{ domain?: string, count?: number }}
+  //@returns {Promise<Array>} Array of quiz questions
+ 
 export async function fetchQuizQuestions({ domain = "", count = 5 }) {
   const url = new URL(`${API_BASE}/quiz`);
   if (domain) url.searchParams.append("domain", domain);
-  if (count) url.searchParams.append("count", count);
+  if (count)  url.searchParams.append("count", count);
 
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch quiz questions");
+
   return res.json();
 }
 
-//submit answers to the backend for scoring
-export async function submitQuizAnswers(answers) {
+  
+  //@param {{ answers: Array<{ question_id: number, answer: string }> }}
+  //@returns {Promise<{ score: number, total: number }>}
+ 
+export async function submitQuizAnswers({ answers }) {
   const res = await fetch(`${API_BASE}/quiz/submit`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ answers }),
   });
 
   if (!res.ok) throw new Error("Quiz submission failed");
-  return res.json(); //should return { score: x }
+  return res.json();
+}
+
+
+
+ 
+ //@returns {Promise<Array>} List of lab summaries
+ 
+export async function fetchAllLabs() {
+  const res = await fetch(`${API_BASE}/labs`);
+  if (!res.ok) throw new Error("Failed to fetch labs");
+  return res.json();
+}
+
+ //@param {string|number} labId
+ //@returns {Promise<object>} Lab data
+ 
+export async function fetchLab(labId) {
+  const res = await fetch(`${API_BASE}/labs/${labId}`);
+  if (!res.ok) throw new Error(`Failed to fetch lab (${res.status})`);
+  return res.json();
+}
+
+  
+//  @param {{ userId: string, labId: string, answer: string }}
+ // @returns {Promise<object>} Result (e.g. correct/incorrect)
+ 
+export async function submitLabAnswer(data) {
+  const res = await fetch(`${API_BASE}/labs/submit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error("Submission failed");
+  return res.json();
+}
+
+ 
+ // @returns {Promise<{ status: string }>}
+ 
+export async function checkHealth() {
+  const res = await fetch(`${API_BASE}/health`);
+  return res.json();
 }
