@@ -3,43 +3,79 @@ import { registerUser } from "../utils/api";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+  //keep track of what the user types
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const result = await registerUser({ email, password });
+  //quick check to make sure the email looks valid
+  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
-    if (result.error) {
-      setErrorMsg(result.error);
-    } else {
-      navigate("/login"); //redirect to login on success
+  //this runs when the form is submitted
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    //verify email format before sending
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
     }
-  }
+
+    // send registration data to the backend
+    const res = await registerUser({ email, password });
+    if (res.error) {
+      setError(res.error);
+    } else {
+      //on success, redirect to the login page
+      navigate("/login");
+    }
+  };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded">
-      <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
-      {errorMsg && <p className="text-red-500 mb-4">{errorMsg}</p>}
+    <div className="p-6 max-w-md mx-auto">
+      <h1 className="text-2xl font-semibold mb-4 text-center">Register</h1>
+
+      {/* show any errors at the top */}
+      {error && <div className="mb-4 text-red-600">{error}</div>}
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="email"
-          className="w-full p-2 border rounded"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          className="w-full p-2 border rounded"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        {/* email input */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <input
+            type="email"  //browser-level validation for email format
+            className="w-full border rounded px-3 py-2"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        {/* password input with show/hide toggle */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Password</label>
+          <input
+            type={showPassword ? "text" : "password"}
+            className="w-full border rounded px-3 py-2"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <label className="inline-flex items-center mt-1 text-sm">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword((prev) => !prev)}
+              className="mr-2"
+            />
+            Show Password
+          </label>
+        </div>
+
+        {/* submit button */}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
@@ -50,3 +86,4 @@ export default function Register() {
     </div>
   );
 }
+
