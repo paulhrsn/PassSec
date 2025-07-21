@@ -1,61 +1,68 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation(); // rerun effect when route changes
 
-  //userEmail tracks whether someone is logged in (null if not)
+  // holds the logged‑in user email (null when logged out)
   const [userEmail, setUserEmail] = useState(null);
 
-  //toggle for dropdown menu when email is clicked
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  //check localStorage on mount to see if a user is logged in
+  // keep userEmail in sync with localStorage
   useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    if (email) setUserEmail(email);
-  }, []);
+    const syncAuthState = () => {
+      setUserEmail(localStorage.getItem("userEmail"));
+    };
 
-  //logout handler clears localStorage, resets state, and redirects
+    // run once immediately
+    syncAuthState();
+
+    // update when url changes 
+    // and when any other tab modifies localStorage (storage event)
+    window.addEventListener("storage", syncAuthState);
+
+    return () => {
+      window.removeEventListener("storage", syncAuthState);
+    };
+  }, [location]);
+
+  // log the user out and return to login page
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
     setUserEmail(null);
-    setMenuOpen(false);
-    navigate("/"); //take user back to login page
+    navigate("/");
   };
 
   return (
     <nav className="flex items-center justify-between p-4 bg-gray-800 text-white">
-      {/*app logo/title links to home*/}
+      {/* brand / home link */}
       <Link to="/" className="text-lg font-bold">
         SecTrack
       </Link>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-6">
+        {/*  logged‑in view  */}
         {userEmail ? (
-          //if logged in, show email with dropdown menu
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen(open => !open)}
-              className="hover:underline focus:outline-none"
-            >
-              {userEmail}
-            </button>
+          <>
+            {/* main app links */}
+            <Link to="/quiz" className="hover:underline">
+              Quizzes
+            </Link>
+            <Link to="/labs" className="hover:underline">
+              Labs
+            </Link>
 
-            {menuOpen && (
-              <div className="absolute right-0 mt-2 w-32 bg-white text-gray-800 rounded shadow-lg">
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-                >
-                  Log Out
-                </button>
-              </div>
-            )}
-          </div>
+            {/* user email (plain text) */}
+            <span>{userEmail}</span>
+
+            {/* logout button */}
+            <button onClick={handleLogout} className="hover:underline">
+              Log Out
+            </button>
+          </>
         ) : (
-          //if not logged in, show login and register links
+          /*  logged‑out view  */
           <>
             <Link to="/" className="hover:underline">
               Log In

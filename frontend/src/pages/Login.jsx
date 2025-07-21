@@ -1,81 +1,81 @@
-//React hooks, router utilities
+// Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-//api helper
-import { loginUser } from "../utils/api"
+import { loginUser } from "../utils/api"; // helper to send POST to /login
 
 export default function Login() {
-    //1. component state
+  // cntrolled input state for email & password
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const [email, setEmail] = useState(""); //controlled email input
-    const [password, setPassword] = useState(""); //controlled password input
-    const [error, setError] = useState(""); //holds login error msg
-    const [loading, setLoading] = useState(false);//track if loading so we can disable button while it's submitting
-    const [showPassword, setShowPassword] = useState(false); //add a show pw box
+  //feedback states
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-    //router hook, programmatically navigate on success
-    const navigate = useNavigate();
 
-    //form submit handler
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault(); //prevent full page reload
-        setError("");
-        setLoading(true);
-        try {
-            //call api helper w/ current credentials
-            const { token, user, error: loginError } = await loginUser({ email, password });
+  //form submit handler
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // don't reload page
+    setError("");
+    setLoading(true);
 
-            //if backend returns an error treat it as failure
-        if (loginError) {
-            throw new Error(loginError);
-        }
+    try {
+      // 1.hit the API with current credentials
+      const { token, user, error: loginError } = await loginUser({ email, password });
 
-        //successful login
-        //persist session token in localstorage
-        localStorage.setItem("token", token)
-        //redirect user to dashboard
-        navigate("/dashboard");
-        } catch (err) {
-            //on failure
-            setError(err.message || "Login failed");
-        } finally {
-          setLoading(false)
-        }
-    };
-    //jsx render
-    return (
-        <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded-lg shadow">
-          {/* page header */}
-          <h1 className="text-2xl font-semibold mb-4">Login</h1>
-    
-          {/* show error message if present */}
-          {error && <p className="text-red-500 mb-2">{error}</p>}
-    
-          {/* actual form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* email field */}
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}   // Update state on change
-              className="w-full p-2 border rounded"
-              required
-            />
-    
-            {/* password field */}
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)} // Update state on change
-              className="w-full p-2 border rounded"
-              required
-            />
+      // 2.handle error response from backend
+      if (loginError || !token) {
+        throw new Error(loginError || "Invalid credentials");
+      }
 
-          {/* toggle checkbox */}
-        <div className="flex items-center space-x-2 mt-1">
+      // 3.persist auth in localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("userEmail", user.email); // so Navbar shows it
+
+      // 4. redirect to dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Login failed or user not found.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // UI layout
+  return (
+    <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded-lg shadow">
+      <h1 className="text-2xl font-semibold mb-4">Login</h1>
+
+      {/* error message */}
+      {error && <p className="text-red-500 mb-2">{error}</p>}
+
+      {/* login form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* email input */}
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+
+        {/* password input */}
+        <input
+          type={showPassword ? "text" : "password"}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+
+        {/* show/hide password toggle */}
+        <div className="flex items-center space-x-2">
           <input
             type="checkbox"
             id="showPassword"
@@ -87,14 +87,15 @@ export default function Login() {
             Show Password
           </label>
         </div>
-            {/* submit button */}
-            <button
+
+        {/* Submit button */}
+        <button
           type="submit"
-          disabled={loading}  // Prevent double-clicks during login attempt
-          className={`w-full py-2 text-white rounded 
-            ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+          disabled={loading}
+          className={`w-full py-2 text-white rounded ${
+            loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          {/* change button text while loading */}
           {loading ? "Logging in…" : "Log In"}
         </button>
       </form>
