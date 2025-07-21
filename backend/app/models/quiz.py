@@ -7,6 +7,8 @@ class QuizQuestion(db.Model):
     question = db.Column(db.Text, nullable=False) #question prompt.
     choices = db.Column(db.PickleType, nullable=False)  #list of 4 strings, using PickleType to store as byte-string python object directly in db
     answer = db.Column(db.String, nullable=False)#the correct answer choice, index 0-3
+    explanation = db.Column(db.Text, nullable=False)   #explanation
+
 
     def to_dict(self):
         return {
@@ -14,5 +16,6 @@ class QuizQuestion(db.Model):
             "domain": self.domain,
             "question": self.question,
             "choices": self.choices,
+            "explanation": self.explanation,
         }
 
