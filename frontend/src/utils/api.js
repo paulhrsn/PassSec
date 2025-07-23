@@ -71,16 +71,21 @@ export async function fetchQuizQuestions({ domain = "", count = 5 }) {
   //@param {{ answers: Array<{ question_id: number, answer: string }> }}
   //@returns {Promise<{ score: number, total: number }>}
  
-export async function submitQuizAnswers({ answers }) {
-  const res = await fetch(`${API_BASE}/quiz/submit`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ answers }),
-  });
-
-  if (!res.ok) throw new Error("Quiz submission failed");
-  return res.json();
-}
+  export async function submitQuizAnswers({ answers, domain }) {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE}/quiz/submit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` // ✅ add JWT here
+      },
+      body: JSON.stringify({ answers, domain })
+    });
+  
+    if (!res.ok) throw new Error("Quiz submission failed");
+    return res.json();
+  }
+  
 
 
 
