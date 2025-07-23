@@ -3,6 +3,10 @@ import os
 from dotenv import load_dotenv
 from app.extensions import init_extensions
 from config import Config
+from app.models.user import User
+from app.models.quiz import QuizQuestion
+from app.models.user_quiz_history import UserQuizHistory
+
 
 
 #load valiues from .env file like JWT_SECRET_KEY
