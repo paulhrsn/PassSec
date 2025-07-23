@@ -62,7 +62,7 @@ def login():
         return jsonify({"error": "Invalid credentials"}), 401
     
     #ff it is valid create a JWT token where user.id becomes the identity
-    token = create_access_token(identity=user.id)
+    token = create_access_token(identity=str(user.id))
 
 
     #return token and user info to frontend
