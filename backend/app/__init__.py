@@ -31,6 +31,8 @@ def create_app():
     app.register_blueprint(quiz_bp, url_prefix="/api")
     from app.routes.lab_routes import lab_bp
     app.register_blueprint(lab_bp, url_prefix = "/api")
+    from app.routes.dashboard_routes import dashboard_bp
+    app.register_blueprint(dashboard_bp, url_prefix="/api")
     
 
 
