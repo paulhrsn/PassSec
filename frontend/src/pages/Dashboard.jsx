@@ -1,4 +1,3 @@
-// Dashboard.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,46 +9,54 @@ import {
   ResponsiveContainer,
   LabelList,
 } from "recharts";
+import { fetchUserStats } from "../utils/api"; // helper to get stats per domain
 
 export default function Dashboard() {
   const navigate = useNavigate();
+
+  //hold the logged-in user's email
   const [userEmail, setUserEmail] = useState("");
+
+  //track loading status (both auth check and data fetch)
   const [loading, setLoading] = useState(true);
 
-  // 🔒 Simulated user progress data
-  const [domainStats, setDomainStats] = useState([
-    { domain: "Threats, Attacks & Vulnerabilities", correct: 14, total: 20 },
-    { domain: "Architecture & Design", correct: 10, total: 20 },
-    { domain: "Implementation", correct: 5, total: 20 },
-    { domain: "Operations & Incident Response", correct: 13, total: 20 },
-    { domain: "Governance, Risk & Compliance", correct: 18, total: 20 },
-  ]);
+  //hold aggregated stats, the array of { domain, correct, total, percent }
+  const [domainStats, setDomainStats] = useState([]);
 
+  //verify user is logged in, then fetch stats
   useEffect(() => {
-    const storedEmail = localStorage.getItem("userEmail");
-    if (!storedEmail) {
-      navigate("/login");
-    } else {
+    const initializeDashboard = async () => {
+      const storedEmail = localStorage.getItem("userEmail");
+      if (!storedEmail) { //if not logged in
+        navigate("/login");
+        return;
+      }
       setUserEmail(storedEmail);
-    }
-    setLoading(false);
+
+      //fetch real stats from backend
+      try {
+        const stats = await fetchUserStats();
+        //sort domains by ascending percentage (weakest first)
+        stats.sort((a, b) => a.percent - b.percent);
+        setDomainStats(stats);
+      } catch (err) {
+        console.error("Failed to load dashboard stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeDashboard();
   }, [navigate]);
 
+  //handle user logout by clearing storage and redirectting
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
-  // Sort domains by weakest % correct
-  const sortedDomains = [...domainStats].sort(
-    (a, b) => a.correct / a.total - b.correct / b.total
-  );
-
-  // Data for chart
-  const chartData = sortedDomains.map(({ domain, correct, total }) => ({
-    domain,
-    percent: Math.round((correct / total) * 100),
-  }));
+  //data transformed for the bar chart: [{ domain, percent }]
+  const chartData = domainStats.map(({ domain, percent }) => ({ domain, percent }));
 
   return (
     <div className="max-w-4xl mx-auto mt-16 p-6 bg-white rounded-lg shadow space-y-8">
@@ -57,19 +64,24 @@ export default function Dashboard() {
         <p className="text-gray-600">Loading dashboard…</p>
       ) : (
         <>
-          <div className="text-center">
+          <header className="text-center">
             <h1 className="text-3xl font-bold text-gray-800">
               Welcome, <span className="text-blue-600">{userEmail}</span>
             </h1>
-            <p className="text-gray-600 mt-2">Here's your Security+ progress snapshot</p>
-          </div>
+            <p className="text-gray-600 mt-2">
+              Here&rsquo;s your Security+ progress snapshot
+            </p>
+          </header>
 
-          <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-800">Your Domains</h2>
+          {/* summary list of domains with percentage badges */}
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Your Domains
+            </h2>
             <ul className="space-y-3">
-              {sortedDomains.map(({ domain, correct, total }, i) => {
-                const percent = Math.round((correct / total) * 100);
-                const color =
+              {domainStats.map(({ domain, correct, total, percent }, idx) => {
+                //change badge color based on performance
+                const colorClass =
                   percent >= 80
                     ? "bg-green-100 text-green-800"
                     : percent >= 50
@@ -79,29 +91,38 @@ export default function Dashboard() {
                 return (
                   <li
                     key={domain}
-                    className={`p-4 rounded border flex justify-between items-center ${color}`}
+                    className={`p-4 rounded border flex justify-between items-center ${colorClass}`}
                   >
-                    <span className="font-medium">{i + 1}. {domain}</span>
+                    <span className="font-medium">
+                      {idx + 1}. {domain}
+                    </span>
                     <span className="font-semibold">{percent}%</span>
                   </li>
                 );
               })}
             </ul>
-          </div>
+          </section>
 
-          <div className="mt-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Progress Chart</h2>
+          {/* bar chart visualization of progress */}
+          <section className="mt-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              Progress Chart
+            </h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                {/* X axis is percentage (0–100) */}
                 <XAxis type="number" domain={[0, 100]} hide />
+                {/* Y axis displays domain names */}
                 <YAxis type="category" dataKey="domain" width={180} tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="percent" fill="#3B82F6" radius={[0, 6, 6, 0]}>
+                <Tooltip formatter={(val) => `${val}%`} />
+                {/* The bars  */}
+                <Bar dataKey="percent" radius={[0, 6, 6, 0]}>  
+                  {/* label each bar with its percentage */}
                   <LabelList dataKey="percent" position="right" formatter={(val) => `${val}%`} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </section>
 
           <button
             onClick={handleLogout}

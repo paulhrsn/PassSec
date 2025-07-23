@@ -122,6 +122,20 @@ export async function submitLabAnswer(data) {
   return res.json();
 }
 
+
+export async function fetchUserStats() {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${API_BASE}/dashboard/stats`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch stats");
+  return res.json(); // return an array of { domain, correct, total, percent }
+}
+
  
  // @returns {Promise<{ status: string }>}
  
