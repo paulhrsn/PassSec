@@ -62,22 +62,18 @@ def submit_quiz_answers():
 
     #process each submitted answer
     for ans in answers:
-        qid = ans.get("question_id")  # ID of the question being answered
-        user_ans = (ans.get("answer") or "").strip().lower()  # User's selected answer (case-insensitive)
+        qid = ans.get("question_id") 
+        user_ans = (ans.get("answer") or "").strip().lower() 
 
-        # Look up the original question from the database
         question = QuizQuestion.query.get(qid)
 
         if not question:
-            # If question not found (invalid ID), skip it
             continue
 
-        # Compare user answer to correct answer (case-insensitive match)
         is_correct = (question.answer.strip().lower() == user_ans)
         if is_correct:
-            correct_count += 1  # Count this as a correct answer
+            correct_count += 1 
 
-        # Append detailed result for this question
         results.append({
             "question_id": qid,
             "correct": is_correct,
@@ -85,19 +81,19 @@ def submit_quiz_answers():
             "explanation": question.explanation
         })
 
-    # Create a new record in UserQuizHistory to store this quiz attempt
+    #create a new record in UserQuizHistory to store this quiz attempt
     history = UserQuizHistory(
-        user_id=user.id,      # Link to the user who submitted the quiz
-        domain=domain,        # Security+ domain name (e.g., "Threats")
-        correct=correct_count,  # How many they got right
-        total=len(results)      # How many questions they answered
+        user_id=user.id,      
+        domain=domain,        
+        correct=correct_count, 
+        total=len(results)      
     )
 
-    # Save the new history record to the database
+    #save the new history record to the database
     db.session.add(history)
     db.session.commit()
 
-    # Return score summary and individual question feedback to the frontend
+    #return score summary and individual question feedback to the frontend
     return jsonify({
         "score": correct_count,
         "total": len(results),
