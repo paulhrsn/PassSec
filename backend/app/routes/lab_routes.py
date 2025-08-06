@@ -35,7 +35,12 @@ def submit_lab_answer():
     user_email = get_jwt_identity()
     user = User.query.filter_by(email=user_email).first()
     if user:
-        history = LabAttempt(user_id=user.id, lab_id=lab.id, correct=correct)
+        history = LabAttempt(
+            user_id=user.id, 
+            lab_id=lab.id, 
+            selected_answer=user_answer,
+            correct=correct
+            )
         db.session.add(history)
         db.session.commit()
 

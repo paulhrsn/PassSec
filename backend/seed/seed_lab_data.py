@@ -1,7 +1,8 @@
 # seed/seed_lab_data.py
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.getcwd())
 
 from app import create_app
 from app.extensions import db
