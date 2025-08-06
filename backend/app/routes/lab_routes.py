@@ -19,7 +19,7 @@ lab_bp = Blueprint("lab", __name__, url_prefix="/api")
 @jwt_required()
 def submit_lab_answer():
     #parse the JSON body of the request
-    data = request.get_json()
+    data = request.get_json() or {}
     lab_id = data.get("lab_id")          #id of the lab scenario
     user_answer = data.get("answer")     # sswer submitted by user
 

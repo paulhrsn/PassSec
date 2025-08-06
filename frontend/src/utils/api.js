@@ -111,11 +111,16 @@ export async function fetchLab(labId) {
   
 //  @param {{ userId: string, labId: string, answer: string }}
  // @returns {Promise<object>} Result (e.g. correct/incorrect)
- 
-export async function submitLabAnswer(data) {
+
+ export async function submitLabAnswer(data) {
+  const token = localStorage.getItem("token");
+
   const res = await fetch(`${API_BASE}/labs/submit`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, //for auth routes
+    },
     body: JSON.stringify(data),
   });
 

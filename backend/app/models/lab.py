@@ -23,6 +23,6 @@ class LabScenario(db.Model):
 class LabAttempt(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)  # foreign key later if you want
-    scenario_id = db.Column(db.Integer, nullable=False)
+    lab_id = db.Column(db.Integer, nullable=False)
     selected_answer = db.Column(db.String, nullable=False)
     correct = db.Column(db.Boolean, nullable=False)

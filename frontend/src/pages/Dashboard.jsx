@@ -81,7 +81,7 @@ export default function Dashboard() {
 
             {domainStats.length === 0 && (
               <p className="text-gray-600">
-                take a quiz to see your first stats!
+                Take a quiz or try a lab see your first stats!
               </p>
             )}
 
