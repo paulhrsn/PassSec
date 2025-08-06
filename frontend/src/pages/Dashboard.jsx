@@ -105,31 +105,46 @@ export default function Dashboard() {
 
           {/* bar chart visualization of progress */}
           <section className="mt-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Progress Chart
-            </h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                {/* X axis is percentage (0–100) */}
-                <XAxis type="number" domain={[0, 100]} hide />
-                {/* Y axis displays domain names */}
-                <YAxis type="category" dataKey="domain" width={180} tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(val) => `${val}%`} />
-                {/* The bars  */}
-                <Bar dataKey="percent" radius={[0, 6, 6, 0]}>  
-                  {/* label each bar with its percentage */}
-                  <LabelList dataKey="percent" position="right" formatter={(val) => `${val}%`} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </section>
+  <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+    Progress Chart
+  </h2>
+  <ResponsiveContainer width="100%" height={300}>
+    <BarChart
+      data={chartData}
+      layout="vertical"
+      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+    >
+      <XAxis type="number" domain={[0, 100]} hide />
+      <YAxis
+        type="category"
+        dataKey="domain"
+        width={180}
+        tick={{ fontSize: 12 }}
+      />
+      <Tooltip formatter={(val) => `${val}%`} />
+      <Bar
+        dataKey="percent"
+        fill="#3B82F6"
+        background={{ fill: "#E5E7EB" }}
+        radius={[0, 6, 6, 0]}
+      >
+        <LabelList
+          dataKey="percent"
+          position="right"
+          formatter={(val) => `${val}%`}
+        />
+      </Bar>
+    </BarChart>
+  </ResponsiveContainer>
+</section>
 
-          <button
-            onClick={handleLogout}
-            className="mt-8 w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded"
-          >
-            Log Out
-          </button>
+<button
+  onClick={handleLogout}
+  className="mt-8 w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+>
+  Log Out
+</button>
+
         </>
       )}
     </div>
