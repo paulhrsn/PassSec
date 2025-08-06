@@ -72,12 +72,13 @@ export async function fetchQuizQuestions({ domain = "", count = 5 }) {
   //@returns {Promise<{ score: number, total: number }>}
  
   export async function submitQuizAnswers({ answers, domain }) {
+    console.log("sending payload:", { answers, domain }); //trying to verify the domain is getting sent
     const token = localStorage.getItem("token");
     const res = await fetch(`${API_BASE}/quiz/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}` // ✅ add JWT here
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ answers, domain })
     });

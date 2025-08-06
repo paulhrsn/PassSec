@@ -55,8 +55,14 @@ export default function QuizPage() {
         answer:      selectedAnswers[q.id] || ""
       }));
 
+       // making sure domain isn’t undefined
+    console.log("↗️ submitting payload:", { answers: payload, domain });
+
       // now expecting { score, total, results }
-      const { score, total, results } = await submitQuizAnswers({ answers: payload });
+      const { score, total, results } = await submitQuizAnswers({
+         answers: payload, 
+         domain 
+        });
 
       setFeedback({ score, total, results });
     } catch (err) {
