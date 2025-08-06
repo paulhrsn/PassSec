@@ -52,6 +52,9 @@ export default function Navbar() {
             <Link to="/labs" className="hover:underline">
               Labs
             </Link>
+            <Link to="/dashboard" className="hover:underline">
+            Dashboard
+            </Link>
 
             {/* user email (plain text) */}
             <span>{userEmail}</span>
