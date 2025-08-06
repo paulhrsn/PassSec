@@ -1,6 +1,11 @@
 # app/routes/lab_routes.py
 from flask import Blueprint, jsonify, request
-from app.models.lab import LabScenario
+from app.models.lab import LabScenario, LabAttempt
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models.user import User
+from app.extensions import db
+
+
 
 #create new blueprint for lab-related routes
 lab_bp = Blueprint("lab", __name__, url_prefix="/api")
@@ -11,6 +16,7 @@ lab_bp = Blueprint("lab", __name__, url_prefix="/api")
 
 # POST /api/lab/submit to submit an answer to a lab
 @lab_bp.route("/labs/submit", methods=["POST"])
+@jwt_required()
 def submit_lab_answer():
     #parse the JSON body of the request
     data = request.get_json()
@@ -24,6 +30,15 @@ def submit_lab_answer():
 
     #compare user answer to correct answer (case-insensitive)
     correct = lab.answer.strip().lower() == user_answer.strip().lower()
+
+    #save to history
+    user_email = get_jwt_identity()
+    user = User.query.filter_by(email=user_email).first()
+    if user:
+        history = LabAttempt(user_id=user.id, lab_id=lab.id, correct=correct)
+        db.session.add(history)
+        db.session.commit()
+
 
     #return whether answer was correct, and what the correct answer is
     return jsonify({
