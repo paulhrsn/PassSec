@@ -4,7 +4,7 @@ from datetime import datetime
 
 class LabScenario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    domain   = db.Column(db.String(100), nullable=False)    # NEW!
+    domain = db.Column(db.String(100), nullable=False)    # NEW!
     title = db.Column(db.String, nullable=False)
     log_data = db.Column(db.Text, nullable=False)  #fake logs
     question = db.Column(db.String, nullable=False)

@@ -1,47 +1,53 @@
-from flask import Flask
+# backend/app/__init__.py
+
 import os
+from flask import Flask
 from dotenv import load_dotenv
-from app.extensions import init_extensions
-from config import Config
-from app.models.user import User
-from app.models.quiz import QuizQuestion
-from app.models.user_quiz_history import UserQuizHistory
 
-
-
-#load valiues from .env file like JWT_SECRET_KEY
+#load variables from .env so things like secret keys and database url are ready to use
 load_dotenv(override=True)
-print("→ DATABASE_URL=", os.getenv("DATABASE_URL"))
 
-def create_app():
+from app.config import Config           
+from app.extensions import init_extensions 
+from app.cli import create_user            
+
+
+def create_app() -> Flask:
+  
     app = Flask(__name__)
-    app.config.from_object(Config)  #load config from class
-    #init extensions
-    #config values; just for dev and prod
 
+    # load all the settings from our config class
+    app.config.from_object(Config)
+
+    # quick printouts to make sure it’s loading the right stuff (safe values only)
+    print("→ db uri:", app.config.get("SQLALCHEMY_DATABASE_URI"))
+    print("→ jwt key set:", bool(app.config.get("JWT_SECRET_KEY")))
+    print("→ cors origins:", app.config.get("CORS_ORIGINS", "not set"))
 
     init_extensions(app)
 
-    #register route blueprints
     from app.routes.auth_routes import auth_bp
-    app.register_blueprint(auth_bp, url_prefix = "/api")
     from app.routes.health import health_bp
-    app.register_blueprint(health_bp, url_prefix="/api")
     from app.routes.quiz_routes import quiz_bp
-    app.register_blueprint(quiz_bp, url_prefix="/api")
     from app.routes.lab_routes import lab_bp
-    app.register_blueprint(lab_bp, url_prefix = "/api")
     from app.routes.dashboard_routes import dashboard_bp
+
+    # mount the routes under /api so the frontend paths don’t get messy
+    app.register_blueprint(auth_bp, url_prefix="/api")
+    app.register_blueprint(health_bp, url_prefix="/api")
+    app.register_blueprint(quiz_bp, url_prefix="/api")
+    app.register_blueprint(lab_bp, url_prefix="/api")
     app.register_blueprint(dashboard_bp, url_prefix="/api")
-    
 
-
-
-    # from app.routes.lab_routes import lab_bp
-    # app.register_blueprint(lab_bp)
-    from app.cli import create_user 
+    # add our custom terminal commands like "flask create-user"
     app.cli.add_command(create_user)
+
+    @app.errorhandler(401)
+    def _unauthorized(err):
+        return {"error": "unauthorized"}, 401
+
+    @app.errorhandler(404)
+    def _not_found(err):
+        return {"error": "not found"}, 404
+
     return app
-
-
-    
