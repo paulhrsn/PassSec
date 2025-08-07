@@ -8,11 +8,13 @@ import Dashboard from "./pages/Dashboard";
 import React, { useEffect } from "react";
 import { checkHealth } from "./utils/api";
 import LabList from "./pages/LabList";
+import RequireAuth from "./components/RequireAuth"; // <-- import the wrapper
 
 function App() {
   useEffect(() => {
     checkHealth().then(console.log).catch(console.error);
   }, []);
+
   return (
     <Router>
       <Navbar />
@@ -24,13 +26,20 @@ function App() {
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/labs" element={<LabList />} />
           <Route path="/labs/:labId" element={<LabPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          
+          {/* protect dashboard so it only works if logged in */}
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </div>
     </Router>
   );
 }
-
-
 
 export default App;
