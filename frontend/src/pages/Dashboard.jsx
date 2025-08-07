@@ -39,6 +39,10 @@ export default function Dashboard() {
         setDomainStats(stats);
       } catch (e) {
         console.error("failed to load stats:", e);
+        if (e.message === "Unauthorized") {
+          // token was stale; userEmail was cleared by authFetch
+          return navigate("/login");
+        }
       } finally {
         setLoading(false);
       }
