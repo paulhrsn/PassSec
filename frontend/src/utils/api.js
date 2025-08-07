@@ -1,5 +1,27 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5001/api";
 
+
+
+// helper that automatically sends your login info with every request
+// and logs you out if the server says you’re not authorized
+async function authFetch(url, options = {}) {
+  const token = localStorage.getItem("token"); //gets saved login token from local storage
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (res.status === 401) {
+    // nuke stale state so navbar stops showing "logged in"
+    localStorage.removeItem("token");
+    localStorage.removeItem("userEmail");
+  }
+
+  return res;
+}
   
 //  @param {{ email: string, password: string }}
 // @returns {Promise<{ token: string, user: object } | { error: string }>}
