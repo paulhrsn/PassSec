@@ -11,6 +11,8 @@ export default function Navbar() {
   // keep userEmail in sync with localStorage
   useEffect(() => {
     const syncAuthState = () => {
+    const t = localStorage.getItem("token");
+    const email = t ? localStorage.getItem("userEmail") : null;
       setUserEmail(localStorage.getItem("userEmail"));
     };
 
