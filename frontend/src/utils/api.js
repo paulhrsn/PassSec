@@ -7,7 +7,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5001/api";
 async function authFetch(url, options = {}) {
   const token = localStorage.getItem("token"); //gets saved login token from local storage
   const res = await fetch(url, {
-    ...options,
+    ...options, //keep options passed into function
     headers: {
       ...(options.headers || {}),
       Authorization: `Bearer ${token}`,
@@ -94,17 +94,11 @@ export async function fetchQuizQuestions({ domain = "", count = 5 }) {
   //@returns {Promise<{ score: number, total: number }>}
  
   export async function submitQuizAnswers({ answers, domain }) {
-    console.log("sending payload:", { answers, domain }); //trying to verify the domain is getting sent
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${API_BASE}/quiz/submit`, {
+    const res = await authFetch(`${API_BASE}/quiz/submit`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ answers, domain })
     });
-  
     if (!res.ok) throw new Error("Quiz submission failed");
     return res.json();
   }
@@ -135,33 +129,22 @@ export async function fetchLab(labId) {
  // @returns {Promise<object>} Result (e.g. correct/incorrect)
 
  export async function submitLabAnswer(data) {
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(`${API_BASE}/labs/submit`, {
+  const res = await authFetch(`${API_BASE}/labs/submit`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`, //for auth routes
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-
   if (!res.ok) throw new Error("Submission failed");
   return res.json();
 }
 
 
+
 export async function fetchUserStats() {
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(`${API_BASE}/dashboard/stats`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  });
-
+  const res = await authFetch(`${API_BASE}/dashboard/stats`);
+  if (res.status === 401) throw new Error("Unauthorized");
   if (!res.ok) throw new Error("Failed to fetch stats");
-  return res.json(); // return an array of { domain, correct, total, percent }
+  return res.json();
 }
 
  
