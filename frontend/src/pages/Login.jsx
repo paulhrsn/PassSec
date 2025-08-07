@@ -1,50 +1,57 @@
 // Login.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../utils/api"; // helper to send POST to /login
 
 export default function Login() {
-  // cntrolled input state for email & password
+  // controlled input state for email & password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  //feedback states
+  // feedback states
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-
   const navigate = useNavigate();
 
-  //form submit handler
+  // if already logged in, skip this page
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard", { replace: true }); // replace so back button won’t go to /login
+    }
+  }, [navigate]);
+
+  // form submit handler
   const handleSubmit = async (e) => {
     e.preventDefault(); // don't reload page
     setError("");
     setLoading(true);
 
     try {
-      // 1.hit the API with current credentials
+      // 1) hit the api with current credentials
       const { token, user, error: loginError } = await loginUser({ email, password });
 
-      // 2.handle error response from backend
+      // 2) handle error response from backend
       if (loginError || !token) {
-        throw new Error(loginError || "Invalid credentials");
+        throw new Error(loginError || "invalid credentials");
       }
 
-      // 3.persist auth in localStorage
+      // 3) persist auth in localStorage
       localStorage.setItem("token", token);
-      localStorage.setItem("userEmail", user.email); // so Navbar shows it
+      localStorage.setItem("userEmail", user.email); // so navbar shows it
 
-      // 4. redirect to dashboard
-      navigate("/dashboard");
+      // 4) redirect to dashboard
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err.message || "Login failed or user not found.");
+      setError(err.message || "login failed or user not found.");
     } finally {
       setLoading(false);
     }
   };
 
-  // UI layout
+  // ui layout
   return (
     <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded-lg shadow">
       <h1 className="text-2xl font-semibold mb-4">Login</h1>
@@ -83,12 +90,12 @@ export default function Login() {
             onChange={() => setShowPassword(!showPassword)}
             className="w-4 h-4"
           />
-          <label htmlFor="showPassword" className="text-sm text-gray-700">
-            Show Password
+        <label htmlFor="showPassword" className="text-sm text-gray-700">
+            show password
           </label>
         </div>
 
-        {/* Submit button */}
+        {/* submit button */}
         <button
           type="submit"
           disabled={loading}
@@ -96,7 +103,7 @@ export default function Login() {
             loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
           }`}
         >
-          {loading ? "Logging in…" : "Log In"}
+          {loading ? "logging in…" : "log in"}
         </button>
       </form>
     </div>
