@@ -6,15 +6,12 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5001/api";
 // and logs you out if the server says you’re not authorized
 async function authFetch(url, options = {}) {
   const token = localStorage.getItem("token"); //gets saved login token from local storage
-  const res = await fetch(url, {
-    ...options, //keep options passed into function
-    headers: {
-      ...(options.headers || {}),
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const headers = { ...(options.headers || {}) }; //use provided headers
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(url, { ...options, headers });
 
-  if (res.status === 401) {
+
+  if (res.status === 401 || res.status === 422) {
     // nuke stale state so navbar stops showing "logged in"
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
@@ -142,7 +139,7 @@ export async function fetchLab(labId) {
 
 export async function fetchUserStats() {
   const res = await authFetch(`${API_BASE}/dashboard/stats`);
-  if (res.status === 401) throw new Error("Unauthorized");
+  if (res.status === 401 || res.status === 422) throw new Error("Unauthorized");
   if (!res.ok) throw new Error("Failed to fetch stats");
   return res.json();
 }
