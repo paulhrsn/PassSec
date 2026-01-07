@@ -29,14 +29,12 @@ def create_app() -> Flask:
     from app.routes.auth_routes import auth_bp
     from app.routes.health import health_bp
     from app.routes.quiz_routes import quiz_bp
-    from app.routes.lab_routes import lab_bp
     from app.routes.dashboard_routes import dashboard_bp
 
     # mount the routes under /api so the frontend paths don’t get messy
     app.register_blueprint(auth_bp, url_prefix="/api")
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(quiz_bp, url_prefix="/api")
-    app.register_blueprint(lab_bp, url_prefix="/api")
     app.register_blueprint(dashboard_bp, url_prefix="/api")
 
     # add our custom terminal commands like "flask create-user"

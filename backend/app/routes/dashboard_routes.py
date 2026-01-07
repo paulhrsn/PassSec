@@ -3,7 +3,6 @@ from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.user import User
 from app.models.user_quiz_history import UserQuizHistory
-from app.models.lab import LabAttempt, LabScenario
 from app.extensions import db
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -23,18 +22,6 @@ def get_user_stats():
         totals.setdefault(dom, {"correct": 0, "total": 0})
         totals[dom]["correct"] += e.correct
         totals[dom]["total"]   += e.total
-
-    #aggregate labs by domain (via LabScenario.domain)
-    attempts = LabAttempt.query.filter_by(user_id=user.id).all()
-    if attempts:
-        lab_ids = {a.lab_id for a in attempts}
-        scenarios = LabScenario.query.filter(LabScenario.id.in_(lab_ids)).all()
-        id_to_domain = {s.id: (s.domain or "Unknown") for s in scenarios}
-        for a in attempts:
-            dom = id_to_domain.get(a.lab_id, "Unknown")
-            totals.setdefault(dom, {"correct": 0, "total": 0})
-            totals[dom]["correct"] += 1 if a.correct else 0
-            totals[dom]["total"]   += 1
 
     #format for frontend
     results = []
