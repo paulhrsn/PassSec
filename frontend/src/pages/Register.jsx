@@ -1,89 +1,157 @@
-import { useState } from "react";
+// src/pages/Register.jsx
+import { useMemo, useState } from "react";
 import { registerUser } from "../utils/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Register() {
-  //keep track of what the user types
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  //quick check to make sure the email looks valid
-  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
+  const emailLooksValid = useMemo(() => /\S+@\S+\.\S+/.test(email), [email]);
 
-  //this runs when the form is submitted
+  const passwordStrength = useMemo(() => {
+    const len = password.length;
+    if (!password) return { label: "", cls: "" };
+    if (len >= 12) return { label: "Strong", cls: "text-emerald-200" };
+    if (len >= 8) return { label: "Okay", cls: "text-amber-200" };
+    return { label: "Weak", cls: "text-rose-200" };
+  }, [password]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    //verify email format before sending
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+    try {
+      if (!emailLooksValid) throw new Error("Please enter a valid email address.");
+      if (password.length < 8) throw new Error("Password must be at least 8 characters.");
 
-    // send registration data to the backend
-    const res = await registerUser({ email, password });
-    if (res.error) {
-      setError(res.error);
-    } else {
-      //on success, redirect to the login page
+      const res = await registerUser({ email, password });
+      if (res.error) throw new Error(res.error);
+
       navigate("/login");
+    } catch (err) {
+      setError(err.message || "Registration failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-semibold mb-4 text-center">Register</h1>
+    <div className="min-h-[calc(100vh-64px)] bg-slate-950">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="max-w-md mx-auto">
+          <p className="text-slate-400 text-sm">Authentication</p>
+          <h1 className="text-3xl font-semibold text-white tracking-tight mt-1">
+            Create your account
+          </h1>
+          <p className="text-slate-400 mt-2">
+            Register to start tracking your Security+ quiz performance.
+          </p>
 
-      {/* show any errors at the top */}
-      {error && <div className="mb-4 text-red-600">{error}</div>}
+          <div className="mt-6 rounded-2xl bg-white/5 ring-1 ring-white/10 p-6">
+            {error && (
+              <div className="mb-4 rounded-xl bg-rose-500/10 ring-1 ring-rose-500/20 px-4 py-3 text-rose-200 text-sm">
+                {error}
+              </div>
+            )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* email input */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input
-            type="email"  //browser-level validation for email format
-            className="w-full border rounded px-3 py-2"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* email */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  className={`w-full rounded-xl bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ring-1 px-3 py-2 focus:outline-none focus:ring-2
+                    ${
+                      email.length === 0
+                        ? "ring-white/10 focus:ring-sky-400/40"
+                        : emailLooksValid
+                        ? "ring-emerald-500/20 focus:ring-emerald-500/30"
+                        : "ring-rose-500/20 focus:ring-rose-500/30"
+                    }`}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                {email.length > 0 && (
+                  <p className={`text-xs mt-2 ${emailLooksValid ? "text-emerald-200" : "text-rose-200"}`}>
+                    {emailLooksValid ? "Looks good." : "That email format looks off."}
+                  </p>
+                )}
+              </div>
+
+              {/* password */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-slate-200">
+                    Password
+                  </label>
+                  {passwordStrength.label && (
+                    <span className={`text-xs ${passwordStrength.cls}`}>
+                      {passwordStrength.label}
+                    </span>
+                  )}
+                </div>
+
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="At least 8 characters"
+                  className="w-full rounded-xl bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ring-1 ring-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400/40"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+
+                <label className="mt-3 inline-flex items-center gap-2 text-sm text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={showPassword}
+                    onChange={() => setShowPassword((prev) => !prev)}
+                    className="h-4 w-4 rounded border-white/20 bg-white/10"
+                  />
+                  Show password
+                </label>
+
+              </div>
+
+              {/* submit */}
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full px-4 py-2 rounded-xl font-semibold ring-1 transition
+                  ${
+                    loading
+                      ? "bg-sky-500/10 text-sky-200 ring-sky-500/20 cursor-not-allowed"
+                      : "bg-sky-500/15 text-sky-200 ring-sky-500/25 hover:bg-sky-500/25"
+                  }`}
+              >
+                {loading ? "Creating account…" : "Register"}
+              </button>
+
+              <p className="text-sm text-slate-400 text-center pt-2">
+                Already have an account?{" "}
+                <Link to="/login" className="text-sky-300 hover:text-sky-200 underline">
+                  Log in
+                </Link>
+              </p>
+            </form>
+          </div>
+
+          <p className="text-xs text-slate-500 text-center mt-6">
+            Your email is used as your account ID (shown in the navbar).
+          </p>
         </div>
-
-        {/* password input with show/hide toggle */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
-          <input
-            type={showPassword ? "text" : "password"}
-            className="w-full border rounded px-3 py-2"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <label className="inline-flex items-center mt-1 text-sm">
-            <input
-              type="checkbox"
-              checked={showPassword}
-              onChange={() => setShowPassword((prev) => !prev)}
-              className="mr-2"
-            />
-            Show Password
-          </label>
-        </div>
-
-        {/* submit button */}
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          Register
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
-

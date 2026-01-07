@@ -3,11 +3,9 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import QuizPage from "./pages/QuizPage";
-import LabPage from "./pages/LabPage";
 import Dashboard from "./pages/Dashboard";
 import React, { useEffect } from "react";
 import { checkHealth } from "./utils/api";
-import LabList from "./pages/LabList";
 import RequireAuth from "./components/RequireAuth"; 
 
 function App() {
@@ -24,8 +22,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/quiz" element={<QuizPage />} />
-          <Route path="/labs" element={<LabList />} />
-          <Route path="/labs/:labId" element={<LabPage />} />
+
           
           {/* protect dashboard so it only works if logged in */}
           <Route

@@ -9,5 +9,4 @@ else
     PYTHON_CMD="python3"
 fi
 
-$PYTHON_CMD seed_lab_data.py
 $PYTHON_CMD seed_quiz_data.py

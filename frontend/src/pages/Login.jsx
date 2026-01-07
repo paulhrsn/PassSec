@@ -1,111 +1,136 @@
-// Login.jsx
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { loginUser } from "../utils/api"; // helper to send POST to /login
+// src/pages/Login.jsx
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { loginUser } from "../utils/api";
 
 export default function Login() {
-  // controlled input state for email & password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // feedback states
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
-  // if already logged in, skip this page
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/dashboard", { replace: true }); // replace so back button won’t go to /login
-    }
+    if (token) navigate("/dashboard", { replace: true });
   }, [navigate]);
 
-  // form submit handler
   const handleSubmit = async (e) => {
-    e.preventDefault(); // don't reload page
+    e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // 1) hit the api with current credentials
       const { token, user, error: loginError } = await loginUser({ email, password });
 
-      // 2) handle error response from backend
-      if (loginError || !token) {
-        throw new Error(loginError || "invalid credentials");
-      }
+      if (loginError || !token) throw new Error(loginError || "Invalid credentials.");
 
-      // 3) persist auth in localStorage
       localStorage.setItem("token", token);
-      localStorage.setItem("userEmail", user.email); // so navbar shows it
+      localStorage.setItem("userEmail", user.email);
 
-      // 4) redirect to dashboard
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err.message || "login failed or user not found.");
+      setError(err.message || "Login failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ui layout
   return (
-    <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded-lg shadow">
-      <h1 className="text-2xl font-semibold mb-4">Login</h1>
+    <div className="min-h-[calc(100vh-64px)] bg-slate-950">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="max-w-md mx-auto">
+          {/* header */}
+          <p className="text-slate-400 text-sm">Authentication</p>
+          <h1 className="text-3xl font-semibold text-white tracking-tight mt-1">
+            Log in
+          </h1>
+          <p className="text-slate-400 mt-2">
+            Welcome back. Continue tracking your Security+ progress.
+          </p>
 
-      {/* error message */}
-      {error && <p className="text-red-500 mb-2">{error}</p>}
+          {/* card */}
+          <div className="mt-6 rounded-2xl bg-white/5 ring-1 ring-white/10 p-6">
+            {/* error */}
+            {error && (
+              <div className="mb-4 rounded-xl bg-rose-500/10 ring-1 ring-rose-500/20 px-4 py-3 text-rose-200 text-sm">
+                {error}
+              </div>
+            )}
 
-      {/* login form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* email input */}
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* email */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-xl bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ring-1 ring-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400/40"
+                  required
+                />
+              </div>
 
-        {/* password input */}
-        <input
-          type={showPassword ? "text" : "password"}
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
+              {/* password */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">
+                  Password
+                </label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-xl bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ring-1 ring-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400/40"
+                  required
+                />
 
-        {/* show/hide password toggle */}
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="showPassword"
-            checked={showPassword}
-            onChange={() => setShowPassword(!showPassword)}
-            className="w-4 h-4"
-          />
-        <label htmlFor="showPassword" className="text-sm text-gray-700">
-            show password
-          </label>
+                <label className="mt-3 inline-flex items-center gap-2 text-sm text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={showPassword}
+                    onChange={() => setShowPassword((p) => !p)}
+                    className="h-4 w-4 rounded border-white/20 bg-white/10"
+                  />
+                  Show password
+                </label>
+              </div>
+
+              {/* submit */}
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full px-4 py-2 rounded-xl font-semibold ring-1 transition
+                  ${
+                    loading
+                      ? "bg-sky-500/10 text-sky-200 ring-sky-500/20 cursor-not-allowed"
+                      : "bg-sky-500/15 text-sky-200 ring-sky-500/25 hover:bg-sky-500/25"
+                  }`}
+              >
+                {loading ? "Logging in…" : "Log in"}
+              </button>
+
+              {/* footer */}
+              <p className="text-sm text-slate-400 text-center pt-2">
+                Don’t have an account?{" "}
+                <Link to="/register" className="text-sky-300 hover:text-sky-200 underline">
+                  Register
+                </Link>
+              </p>
+            </form>
+          </div>
+
+          <p className="text-xs text-slate-500 text-center mt-6">
+            Tip: Use a real email format — it’s your account identifier.
+          </p>
         </div>
-
-        {/* submit button */}
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full py-2 text-white rounded ${
-            loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {loading ? "logging in…" : "log in"}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
