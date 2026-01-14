@@ -147,9 +147,6 @@ export default function Register() {
             </form>
           </div>
 
-          <p className="text-xs text-slate-500 text-center mt-6">
-            Your email is used as your account ID (shown in the navbar).
-          </p>
         </div>
       </div>
     </div>

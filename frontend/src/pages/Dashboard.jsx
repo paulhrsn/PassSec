@@ -1,5 +1,4 @@
 // src/pages/Dashboard.jsx
-// Premium dashboard: stat cards + domain progress list + recharts bar chart
 
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";

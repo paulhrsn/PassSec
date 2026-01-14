@@ -126,9 +126,6 @@ export default function Login() {
             </form>
           </div>
 
-          <p className="text-xs text-slate-500 text-center mt-6">
-            Tip: Use a real email format — it’s your account identifier.
-          </p>
         </div>
       </div>
     </div>
