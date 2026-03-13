@@ -2,7 +2,8 @@
 // Premium Quiz UI (dark theme): start panel + question cards + selectable options + results summary
 
 import { useMemo, useState } from "react";
-import { fetchQuizQuestions, submitQuizAnswers } from "../utils/api";
+import { useEffect } from "react";
+import { fetchQuizDomains, fetchQuizQuestions, submitQuizAnswers } from "../utils/api";
 
 function OptionRow({ label, selected, disabled, onClick, state }) {
   // state: "neutral" | "correct" | "wrong"
@@ -44,23 +45,49 @@ export default function QuizPage() {
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [feedback, setFeedback] = useState(null);
 
-  const [domain, setDomain] = useState("Random");
-  const [count, setCount] = useState(5);
+  const [domain, setDomain] = useState(localStorage.getItem("quizDomain") || "Random");
+  const [count, setCount] = useState(Number(localStorage.getItem("quizCount") || 5));
+  const [domains, setDomains] = useState(["Random"]);
+  const [error, setError] = useState("");
   const [started, setStarted] = useState(false);
   const [starting, setStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    async function loadDomains() {
+      try {
+        const items = await fetchQuizDomains();
+        setDomains(["Random", ...items]);
+      } catch (err) {
+        setError(err.message || "Could not load quiz domains.");
+      }
+    }
+    loadDomains();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("quizDomain", domain);
+  }, [domain]);
+
+  useEffect(() => {
+    localStorage.setItem("quizCount", String(count));
+  }, [count]);
+
   const startQuiz = async () => {
     try {
+      setError("");
       setStarting(true);
       const qs = await fetchQuizQuestions({ domain, count });
+      if (qs.length === 0) {
+        throw new Error("No questions found for that domain. Try Random.");
+      }
       setQuestions(qs);
       setSelectedAnswers({});
       setFeedback(null);
       setStarted(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      console.error("Error starting quiz:", err);
+      setError(err.message || "Unable to start quiz.");
     } finally {
       setStarting(false);
     }
@@ -72,6 +99,7 @@ export default function QuizPage() {
 
   const handleSubmit = async () => {
     try {
+      setError("");
       setSubmitting(true);
       const payload = questions.map((q) => ({
         question_id: q.id,
@@ -86,7 +114,7 @@ export default function QuizPage() {
       setFeedback({ score, total, results });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      console.error("Quiz submission error:", err);
+      setError(err.message || "Quiz submission failed.");
     } finally {
       setSubmitting(false);
     }
@@ -151,6 +179,12 @@ export default function QuizPage() {
         </div>
 
         {/* start panel */}
+        {error && (
+          <div className="mt-6 rounded-xl bg-rose-500/10 ring-1 ring-rose-500/20 px-4 py-3 text-rose-200 text-sm">
+            {error}
+          </div>
+        )}
+
         {!started ? (
           <div className="mt-10 rounded-2xl bg-white/5 ring-1 ring-white/10 p-6">
             <div className="grid gap-4 md:grid-cols-3">
@@ -163,10 +197,9 @@ export default function QuizPage() {
                   value={domain}
                   onChange={(e) => setDomain(e.target.value)}
                 >
-                  <option>Random</option>
-                  <option>Attacks</option>
-                  <option>Architecture</option>
-                  <option>Implementation</option>
+                  {domains.map((name) => (
+                    <option key={name}>{name}</option>
+                  ))}
                 </select>
                 <p className="text-slate-400 text-xs mt-2">
                   “Random” pulls a mix across domains.
@@ -183,7 +216,7 @@ export default function QuizPage() {
                   max="50"
                   className="w-full rounded-xl bg-slate-900/50 text-slate-100 ring-1 ring-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400/40"
                   value={count}
-                  onChange={(e) => setCount(+e.target.value)}
+                  onChange={(e) => setCount(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
                 />
               </div>
 

@@ -2,6 +2,14 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5001/api";
 
 
+async function readJsonSafe(res) {
+  try {
+    return await res.json();
+  } catch {
+    return {};
+  }
+}
+
 
 // helper that automatically sends your login info with every request
 // and logs you out if the server says you’re not authorized
@@ -32,10 +40,10 @@ export async function loginUser({ email, password }) {
       body: JSON.stringify({ email: email.trim(), password }),
     });
 
-    const data = await res.json();
+    const data = await readJsonSafe(res);
 
     if (!res.ok) {
-      return { error: data.message || "Login failed" };
+      return { error: data.error || data.message || "Login failed" };
     }
 
     return { token: data.token, user: data.user };
@@ -56,7 +64,7 @@ export async function loginUser({ email, password }) {
       body: JSON.stringify({ email: email.trim(), password }),
     });
 
-    const data = await res.json();
+    const data = await readJsonSafe(res);
 
     if (!res.ok) {
       return { error: data.error || data.message || "Registration failed" };
@@ -78,13 +86,23 @@ export async function loginUser({ email, password }) {
  
 export async function fetchQuizQuestions({ domain = "", count = 5 }) {
   const url = new URL(`${API_BASE}/quiz`);
-  if (domain) url.searchParams.append("domain", domain);
+  if (domain && domain.toLowerCase() !== "random") {
+    url.searchParams.append("domain", domain);
+  }
   if (count)  url.searchParams.append("count", count);
 
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch quiz questions");
 
   return res.json();
+}
+
+
+export async function fetchQuizDomains() {
+  const res = await fetch(`${API_BASE}/quiz/domains`);
+  const data = await readJsonSafe(res);
+  if (!res.ok) throw new Error(data.error || "Failed to fetch domains");
+  return data.domains || [];
 }
 
   
@@ -97,7 +115,10 @@ export async function fetchQuizQuestions({ domain = "", count = 5 }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ answers, domain })
     });
-    if (!res.ok) throw new Error("Quiz submission failed");
+    if (!res.ok) {
+      const data = await readJsonSafe(res);
+      throw new Error(data.error || "Quiz submission failed");
+    }
     return res.json();
   }
 
@@ -108,6 +129,16 @@ export async function fetchUserStats() {
   if (res.status === 401 || res.status === 422) throw new Error("Unauthorized");
   if (!res.ok) throw new Error("Failed to fetch stats");
   return res.json();
+}
+
+
+export async function fetchCurrentUser() {
+  const res = await authFetch(`${API_BASE}/me`);
+  const data = await readJsonSafe(res);
+  if (!res.ok) {
+    throw new Error(data.error || "Unauthorized");
+  }
+  return data.user;
 }
 
  
