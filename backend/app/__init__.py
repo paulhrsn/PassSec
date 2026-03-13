@@ -13,16 +13,12 @@ from app.cli import create_user
 
 
 def create_app() -> Flask:
-  
+
     app = Flask(__name__)
 
     # load all the settings from our config class
     app.config.from_object(Config)
-
-    # quick printouts to make sure it’s loading the right stuff (safe values only)
-    print("→ db uri:", app.config.get("SQLALCHEMY_DATABASE_URI"))
-    print("→ jwt key set:", bool(app.config.get("JWT_SECRET_KEY")))
-    print("→ cors origins:", app.config.get("CORS_ORIGINS", "not set"))
+    Config.validate()
 
     init_extensions(app)
 
@@ -47,5 +43,9 @@ def create_app() -> Flask:
     @app.errorhandler(404)
     def _not_found(err):
         return {"error": "not found"}, 404
+
+    @app.errorhandler(413)
+    def _request_too_large(err):
+        return {"error": "payload too large"}, 413
 
     return app

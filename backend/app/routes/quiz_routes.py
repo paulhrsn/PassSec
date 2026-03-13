@@ -2,7 +2,12 @@
 
 from flask import Blueprint, jsonify, request
 from sqlalchemy.sql.expression import func
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 from app.models.quiz import QuizQuestion
+from app.models.user import User
+from app.models.user_quiz_history import UserQuizHistory
+from app.extensions import db
 
 
 #create a Blueprint for all /api/quiz routes
@@ -33,27 +38,39 @@ def get_quiz_questions():
     )
 
     return jsonify([q.to_dict() for q in questions]), 200
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models.user import User
-from app.models.user_quiz_history import UserQuizHistory
-from app.extensions import db
+
+
+@quiz_bp.route("/quiz/domains", methods=["GET"])
+def get_quiz_domains():
+    domains = (
+        db.session.query(QuizQuestion.domain)
+        .distinct()
+        .order_by(QuizQuestion.domain.asc())
+        .all()
+    )
+    items = [d[0] for d in domains if d[0]]
+    return jsonify({"domains": items}), 200
 
 @quiz_bp.route("/quiz/submit", methods=["POST"])
 @jwt_required()  
 def submit_quiz_answers():
-    #get email from jwt
-    user_email = get_jwt_identity()
+    identity = get_jwt_identity()
 
-    #look up the user
-    user = User.query.filter_by(email=user_email).first()
+    user = db.session.get(User, int(identity))
     if not user:
-        return jsonify({"error": "user not found"}), 404
+        return jsonify({"error": "User not found"}), 404
 
     #parse json body
     data = request.get_json(silent=True) or {}
 
     #list of { question_id, answer }
     answers = data.get("answers", [])
+    if not isinstance(answers, list):
+        return jsonify({"error": "answers must be a list"}), 400
+    if len(answers) == 0:
+        return jsonify({"error": "answers cannot be empty"}), 400
+    if len(answers) > 100:
+        return jsonify({"error": "answers cannot exceed 100 items"}), 400
 
     #will hold per-question feedback for the frontend
     results = []
@@ -61,11 +78,15 @@ def submit_quiz_answers():
 
     #loop over each submitted answer
     for ans in answers:
+        if not isinstance(ans, dict):
+            continue
         qid = ans.get("question_id")
         user_ans = (ans.get("answer") or "").strip().lower()
+        if not qid:
+            continue
 
         # oad the question so we can compare and get its domain
-        question = QuizQuestion.query.get(qid)
+        question = db.session.get(QuizQuestion, qid)
         if not question:
             continue  #skip if the id is bad
 

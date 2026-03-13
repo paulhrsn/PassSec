@@ -1,12 +1,18 @@
 from flask import Blueprint, request, jsonify
 from app.models.user import User
-from flask_jwt_extended import create_access_token
-from app.services.auth import hash_password, check_password
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from app.services.auth import (
+    hash_password,
+    check_password,
+    is_valid_email,
+    normalize_email,
+    validate_password,
+)
 from app.extensions import db
 from sqlalchemy.exc import IntegrityError
 
 #set up flask blueprint for grouping auth routes
-auth_bp = Blueprint("auth", __name__, url_prefix="/api")
+auth_bp = Blueprint("auth", __name__)
 
 
 #POST /api/register route
@@ -15,12 +21,19 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api")
 def register():
     #parse incoming JSON
     data = request.get_json(silent=True) or {}
-    email = data.get("email")
+    email = normalize_email(data.get("email"))
     password = data.get("password")
 
     #basic validation
     if not email or not password:
         return jsonify({"error": "Email and password required"}), 400
+
+    if not is_valid_email(email):
+        return jsonify({"error": "Please provide a valid email address"}), 400
+
+    ok, msg = validate_password(password)
+    if not ok:
+        return jsonify({"error": msg}), 400
 
     #prevent duplicate sign-ups
     if User.query.filter_by(email=email).first():
@@ -45,8 +58,8 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     #get json from frontend, expecting {email, password}
-    data = request.get_json()
-    email = data.get("email")
+    data = request.get_json(silent=True) or {}
+    email = normalize_email(data.get("email"))
     password = data.get("password")
 
     #validate input fields exist
@@ -63,7 +76,7 @@ def login():
     
     #ff it is valid create a JWT token where user.id becomes the identity
     #temporarily(?) trying to make this email instead of id
-    token = create_access_token(identity=user.email)
+    token = create_access_token(identity=str(user.id))
 
 
     #return token and user info to frontend
@@ -72,4 +85,14 @@ def login():
         "token": token,
         "user": user.to_dict()
     }), 200
+
+
+@auth_bp.route("/me", methods=["GET"])
+@jwt_required()
+def get_me():
+    identity = get_jwt_identity()
+    user = db.session.get(User, int(identity))
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify({"user": user.to_dict()}), 200
 

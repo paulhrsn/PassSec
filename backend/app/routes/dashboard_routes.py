@@ -11,7 +11,7 @@ dashboard_bp = Blueprint("dashboard", __name__)
 @jwt_required()
 def get_user_stats():
     ident = get_jwt_identity()
-    user = User.query.filter_by(email=ident).first()  # we standardized on email
+    user = db.session.get(User, int(ident))
     if not user:
         return jsonify({"error": "User not found"}), 404
 
